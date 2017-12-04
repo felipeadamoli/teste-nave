@@ -3,61 +3,19 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Document</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-        }
-
-        h1 {
-            margin:30px;
-            text-align: center;
-        }
-
-        #divPrincipal {
-            margin: 0 400px;
-        }
-
-        .nomeUser {
-            font-weight: bold;
-        }
-
-        .textoUser {
-            margin-bottom: 20px;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="general.css">
 </head>
 <body>
    <h1>Nave Twitter</h1>
     <div id="divPrincipal">
-            <form>
-                    <label>Tweet</label><br>
-                    <textarea rows="4" cols="50" id="textTweet"></textarea><br>
-                            
-                    <button>New Tweet</button>
-                </form>
+        <form>
+            <label>Tweet</label><br>
+            <textarea rows="4" cols="50" id="textTweet"></textarea><br>               
+            <button>New Tweet</button>
+        </form>
     </div>
     
-
-    
-    
-
    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-   <script>
-    $(document).ready(function(){
-            $.get("https://api-nave-twitter.herokuapp.com/tweets", function(data){
-                var tam = data.length;
-                for(i=0;i<tam;i++){
-                    $("#divPrincipal").append('<p class="nomeUser">'+ data[i].name +'</p>');
-                    $("#divPrincipal").append('<p class="textoUser">'+ data[i].text +'</p>');
-                }
-            });
-            $("button").click(function(){
-                var text = $("#textTweet").val();
-                $.post( "https://api-nave-twitter.herokuapp.com/tweets", { userId: 1, text: text } );
-            });
-            
-    });
-    </script>
+   <script type="text/javascript" src="script.js" ></script>
 </body>
 </html>

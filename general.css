@@ -1,4 +1,21 @@
-*{
-    margin: 0;
-    padding: 0;
-}
+* {
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin:30px;
+            text-align: center;
+        }
+
+        #divPrincipal {
+            margin: 0 400px;
+        }
+
+        .nomeUser {
+            font-weight: bold;
+        }
+
+        .textoUser {
+            margin-bottom: 20px;
+        }
