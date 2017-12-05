@@ -1,39 +1,55 @@
 $(document).ready(function(){
-    $.get("https://api-nave-twitter.herokuapp.com/tweets", function(data){
-        event.preventDefault();
-        var tam = data.length;
-        printTweet(data,tam);
-    });
 
-  
-    $("#newTweet").click(function(){
-        var text = $("#textTweet").val();
-        $.post( "https://api-nave-twitter.herokuapp.com/tweets", { userId: 1, text: text } );
-    });
-    $("#sortTweets").click(function(){
-        event.preventDefault();
-        console.log("entrou");
-            $.get("https://api-nave-twitter.herokuapp.com/tweets", function(data){
+    const arrayTweets = $.get("https://api-nave-twitter.herokuapp.com/tweets");
+    const btnNewTweet = $("#newTweet");
+    const btnSort = $("#sortTweets");
+    const containerTweets = $("#tweetsContainer");
 
-            var tam = data.length;
-            data = data.sort(compare);
-            $("#tweetsContainer").empty();
-            printTweet(data,tam);
-        });
-    });
-    
-    function printTweet(data, tam) {
-        for(i=0;i<tam;i++){
-            $("#tweetsContainer").append('<p class="nomeUser">'+ data[i].name +'</p>');
-            $("#tweetsContainer").append('<p class="textoUser">'+ data[i].text +'</p>');
+    class tweet {
+        constructor(name, text) {
+            this.text = text;
+            this.name = name;
+        }
+        exibeTweet() {
+            containerTweets.append('<p class="nomeUser">'+ this.name +'</p>');
+            containerTweets.append('<p class="textoUser">'+ this.text +'</p>');
         }
     }
 
-    function compare(a,b) {
-      if (a.text < b.text) return -1;
-      if (a.text > b.text) return 1;
-      return 0;
+    
+    arrayTweets.done(function(data){
+        createTweets(data);
+    });
+
+    btnSort.click(function(){
+        event.preventDefault();
+        arrayTweets.done(function(data){
+            data = data.sort(compare);
+            containerTweets.empty();
+            createTweets(data);
+        });
+    });
+
+    btnNewTweet.click(function(){
+        var text = $("#textTweet").val();
+        $.post( "https://api-nave-twitter.herokuapp.com/tweets", { userId: 1, text: text } );
+    });
+
+
+    function createTweets(data) {
+        var tweets_ready = [];
+        var tam = data.length;
+        for(i=0;i<tam;i++){
+            tweets_ready.push(new tweet(data[i].name,data[i].text));
+            tweets_ready[i].exibeTweet();
+        }
+        return tweets_ready;
     }
 
+    function compare(a,b) {
+      if (a.text.toLowerCase() < b.text.toLowerCase()) return -1;
+      if (a.text.toLowerCase() > b.text.toLowerCase()) return 1;
+      return 0;
+    }
 
 });
