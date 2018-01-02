@@ -22,4 +22,5 @@ h1 {
 
 #tweetsContainer {
 	margin-top: 20px;
+	list-style: none;
 }

@@ -1,55 +1,67 @@
-$(document).ready(function(){
-
-    const arrayTweets = $.get("https://api-nave-twitter.herokuapp.com/tweets");
-    const btnNewTweet = $("#newTweet");
-    const btnSort = $("#sortTweets");
-    const containerTweets = $("#tweetsContainer");
-
-    class tweet {
-        constructor(name, text) {
-            this.text = text;
-            this.name = name;
-        }
-        exibeTweet() {
-            containerTweets.append('<p class="nomeUser">'+ this.name +'</p>');
-            containerTweets.append('<p class="textoUser">'+ this.text +'</p>');
-        }
+class Tweet {
+    constructor(props) {
+        this.name = props.name;
+        this.text = props.text;
     }
 
-    
-    arrayTweets.done(function(data){
-        createTweets(data);
-    });
+    render() {
+        return `<li><span class="nomeUser">${this.name}</span><p class="textoUser">${this.text}</p></li>`;
+    }
+}
 
-    btnSort.click(function(){
-        event.preventDefault();
-        arrayTweets.done(function(data){
-            data = data.sort(compare);
-            containerTweets.empty();
-            createTweets(data);
+class TweetsList {
+    constructor(props) {
+        this.$element = $(props.container);
+    }
+
+    render() {
+        $.get('https://api-nave-twitter.herokuapp.com/tweets', (data) => {
+            let result = data.map((t) => {
+                const tweet = new Tweet(t);
+                return tweet.render();
+            })
+            this.$element.append(result);
+        });                
+    }
+}
+
+class SendTweet {
+    constructor(props) {
+        this.form = props.form,
+        this.tweetList = $(props.tweetsContainer)
+        this.bind();
+    }
+
+    bind() {
+        this.form.submit(this.onSubmit.bind(this))
+    }
+
+    onSubmit(e) {
+        e.preventDefault();
+        this.text = $("#textTweet").val();
+        if(this.text)
+            this.add();
+    }
+
+    add() {
+        $.post( "https://api-nave-twitter.herokuapp.com/tweets", { userId: 1, text: this.text }).done(data => {
+            const tweet = new Tweet(data);
+            this.tweetList.append(tweet.render());
+            $("#textTweet").val('');
         });
-    });
-
-    btnNewTweet.click(function(){
-        var text = $("#textTweet").val();
-        $.post( "https://api-nave-twitter.herokuapp.com/tweets", { userId: 1, text: text } );
-    });
-
-
-    function createTweets(data) {
-        var tweets_ready = [];
-        var tam = data.length;
-        for(i=0;i<tam;i++){
-            tweets_ready.push(new tweet(data[i].name,data[i].text));
-            tweets_ready[i].exibeTweet();
-        }
-        return tweets_ready;
+        
     }
+}
 
-    function compare(a,b) {
-      if (a.text.toLowerCase() < b.text.toLowerCase()) return -1;
-      if (a.text.toLowerCase() > b.text.toLowerCase()) return 1;
-      return 0;
-    }
-
-});
+$(document).ready(() => {
+    const tweetsList = new TweetsList({
+        container: '#tweetsContainer'
+    });
+    
+    const sendTweet = new SendTweet({
+        form: $("#form-tweet"),
+        tweetsContainer: '#tweetsContainer'
+    })   
+    
+    tweetsList.render();            
+}); 
