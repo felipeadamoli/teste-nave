@@ -1,67 +1,82 @@
 class Tweet {
     constructor(props) {
-        this.name = props.name;
-        this.text = props.text;
+        this.name = props.username
+        this.text = props.text
     }
 
     render() {
-        return `<li><span class="nomeUser">${this.name}</span><p class="textoUser">${this.text}</p></li>`;
+        return `<li><span class="nomeUser">${this.name}</span><p class="textoUser">${this.text}</p></li>`
     }
 }
 
 class TweetsList {
     constructor(props) {
-        this.$element = $(props.container);
+        this.element = document.getElementById(props.container)
     }
 
     render() {
-        $.get('https://api-nave-twitter.herokuapp.com/tweets', (data) => {
-            let result = data.map((t) => {
-                const tweet = new Tweet(t);
-                return tweet.render();
+        fetch('https://twitter-nave-api.herokuapp.com/tweets')
+            .then(response => {
+                response.json().then((data) => {
+                    let result = data.map((t) => {
+                        const tweet = new Tweet(t)
+                        return tweet.render()
+                    })
+                    result.forEach(el => this.element.innerHTML += el)
+                })
             })
-            this.$element.append(result);
-        });                
+            .catch(error => console.log(error))               
     }
 }
 
 class SendTweet {
     constructor(props) {
-        this.form = props.form,
-        this.tweetList = $(props.tweetsContainer)
-        this.bind();
+        this.form = document.getElementById(props.form)
+        this.textArea = document.getElementById('textTweet')
+        this.tweetList = document.getElementById(props.tweetsContainer)
+        this.bind()
     }
 
     bind() {
-        this.form.submit(this.onSubmit.bind(this))
+        this.form.onsubmit = this.onSubmit.bind(this)
+        this.add = this.add.bind(this)
     }
 
     onSubmit(e) {
-        e.preventDefault();
-        this.text = $("#textTweet").val();
-        if(this.text)
-            this.add();
+        e.preventDefault()
+        const text = this.textArea.value
+        if(text)
+            this.add(text)
     }
 
-    add() {
-        $.post( "https://api-nave-twitter.herokuapp.com/tweets", { userId: 1, text: this.text }).done(data => {
-            const tweet = new Tweet(data);
-            this.tweetList.append(tweet.render());
-            $("#textTweet").val('');
-        });
+    add(text) {
+        fetch('https://twitter-nave-api.herokuapp.com/tweets', {
+            body: JSON.stringify({ text }),
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json, text/plain, */*'
+            }
+        })
+        .then(response => {
+            response.json().then((data) => {
+                const tweet = new Tweet(data)
+                this.tweetList.innerHTML += tweet.render()
+                this.textArea.value = ''
+            })
+        })
+        .catch(error => reject(error))
         
     }
 }
 
-$(document).ready(() => {
-    const tweetsList = new TweetsList({
-        container: '#tweetsContainer'
-    });
-    
-    const sendTweet = new SendTweet({
-        form: $("#form-tweet"),
-        tweetsContainer: '#tweetsContainer'
-    })   
-    
-    tweetsList.render();            
-}); 
+const tweetsList = new TweetsList({
+    container: 'tweet-list'
+})
+
+const sendTweet = new SendTweet({
+    form: 'form-tweet',
+    tweetsContainer: 'tweet-list'
+})   
+
+tweetsList.render()            
